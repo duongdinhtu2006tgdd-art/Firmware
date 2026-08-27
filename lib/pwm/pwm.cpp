@@ -1,8 +1,7 @@
 #include "pwm.h"
 #include <Arduino.h>
 
-// Luu do phan giai tung kenh de quy doi duty % -> duty raw chinh xac.
-// Gia tri 0 nghia la kenh chua duoc init.
+
 static uint8_t s_resolution_bits[PWM_MAX_CHANNELS] = {0};
 
 bool pwm_setup(uint8_t channel, uint8_t pin, uint32_t freq_hz, uint8_t resolution_bits) {
