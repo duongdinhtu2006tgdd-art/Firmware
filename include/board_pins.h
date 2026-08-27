@@ -15,9 +15,7 @@
 
 #define PIN_DHT22             25
 
-// YF-S201 luu luong nuoc (ngo ra xung, doc bang ngat) 
-// Cam bien cap +5V nhung ngo ra open-collector: PHAI pull-up len 3.3V
-// (khong phai 5V) de khong vuot muc logic cua ESP32.
+
 #define PIN_FLOW_SENSOR       27
 
 
