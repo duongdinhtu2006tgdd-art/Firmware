@@ -10,8 +10,7 @@ bool pwm_setup(uint8_t channel, uint8_t pin, uint32_t freq_hz, uint8_t resolutio
     if (resolution_bits == 0 || resolution_bits > 20) return false;
     if (freq_hz == 0) return false;
 
-    // Rang buoc phan cung: freq * 2^bits <= 80 MHz (clock APB).
-    // Dung uint64_t/1ULL vi voi 20-bit thi phep nhan tran uint32_t.
+
     if ((uint64_t)freq_hz * (1ULL << resolution_bits) > 80000000ULL) return false;
 
     if (ledcSetup(channel, freq_hz, resolution_bits) == 0) return false;
