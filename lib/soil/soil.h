@@ -17,17 +17,17 @@
 extern "C" {
 #endif
 
-// He so lam min EMA (0.0 - 1.0). Cang nho cang min nhung phan ung cang cham.
+
 #define SOIL_EMA_ALPHA        0.3f
 
-// Vung raw coi la loi day. Cam bien that khong  ra sat 2 dau nay.
+
 #define SOIL_RAW_FAULT_LOW    50
 #define SOIL_RAW_FAULT_HIGH   4045
 
 typedef enum {
     SOIL_OK = 0,
-    SOIL_ERR_DISCONNECTED,   // raw sat 0 hoac sat 4095 -> nghi tuot day
-    SOIL_ERR_NOT_CALIBRATED  // raw_dry == raw_wet -> chua hieu chuan
+    SOIL_ERR_DISCONNECTED,  
+    SOIL_ERR_NOT_CALIBRATED  
 } soil_status_t;
 
 typedef struct {
@@ -40,15 +40,14 @@ typedef struct {
     const char *name;        // ten de in log
 } soil_t;
 
-// Khoi tao. raw_dry PHAI khac raw_wet, va thong thuong raw_dry > raw_wet.
+
 void soil_setup(soil_t *dev, uint8_t pin, uint16_t raw_dry, uint16_t raw_wet,
                 const char *name);
 
-// Doc cam bien, cap nhat dev->raw va dev->percent.
-// Khi tra ve loi, dev->percent giu gia tri cu (khong dung duoc).
+
 soil_status_t soil_read(soil_t *dev);
 
-// Doi 2 diem hieu chuan luc dang chay (dung khi hieu chuan qua dashboard)
+
 void soil_calibrate(soil_t *dev, uint16_t raw_dry, uint16_t raw_wet);
 
 const char *soil_status_str(soil_status_t status);
@@ -57,4 +56,4 @@ const char *soil_status_str(soil_status_t status);
 }
 #endif
 
-#endif // SOIL_H
+#endif 
