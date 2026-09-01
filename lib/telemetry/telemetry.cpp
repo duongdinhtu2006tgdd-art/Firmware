@@ -91,7 +91,7 @@ void telemetry_log(const telemetry_data_t *d) {
                   (unsigned long)d->dry_run_count);
 }
 
-// Tach chuoi "TEN:tham_so" thanh ten lenh va phan tham so
+
 static void parse_command(char *line, telemetry_command_t *out) {
     out->cmd   = CMD_UNKNOWN;
     out->value = 0.0f;
@@ -100,7 +100,7 @@ static void parse_command(char *line, telemetry_command_t *out) {
     char *colon = strchr(line, ':');
     char *arg   = NULL;
     if (colon) {
-        *colon = '\0';       // cat chuoi tai dau ':'
+        *colon = '\0';      
         arg = colon + 1;
     }
 
@@ -129,10 +129,8 @@ bool telemetry_poll_command(telemetry_command_t *out) {
     while (Serial.available()) {
         char c = (char)Serial.read();
 
-        if (c == '\r') continue;   // chiu duoc ca CRLF va LF
-
-        if (c == '\n') {
-            if (s_cmd_index == 0) continue;   // dong trong -> bo qua
+        if (c == '\r' || c == '\n') {
+            if (s_cmd_index == 0) continue;  
 
             s_cmd_buffer[s_cmd_index] = '\0';
             s_cmd_index = 0;
@@ -143,7 +141,7 @@ bool telemetry_poll_command(telemetry_command_t *out) {
         if (s_cmd_index < TELEMETRY_CMD_MAX - 1) {
             s_cmd_buffer[s_cmd_index++] = c;
         } else {
-            s_cmd_index = 0;   // lenh dai bat thuong -> bo, khong xu ly nua
+            s_cmd_index = 0;   
         }
     }
 
