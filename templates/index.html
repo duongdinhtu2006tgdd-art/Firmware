@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Node 2 - Hệ tưới thông minh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-100 font-sans antialiased">
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+      <div class="flex items-baseline justify-between mb-6 flex-wrap gap-2">
+        <h1 class="text-2xl font-bold text-emerald-700 uppercase tracking-wide">
+          Node 2 — Hệ tưới thông minh
+        </h1>
+        <div class="text-sm">
+          <span class="text-slate-500">Kết nối:</span>
+          <span id="conn" class="font-bold text-amber-500">đang chờ…</span>
+          <span id="uptime" class="text-slate-400 ml-2"></span>
+        </div>
+      </div>
+
+      <!-- Cảm biến -->
+      <h2 class="text-xs font-bold text-slate-400 uppercase mb-2">Cảm biến</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-orange-500"
+        >
+          <div class="text-slate-500 text-xs font-semibold uppercase">
+            Nhiệt độ
+          </div>
+          <div class="mt-1 flex items-baseline">
+            <span id="temp" class="text-3xl font-extrabold text-slate-800"
+              >--</span
+            >
+            <span class="text-lg text-slate-400 ml-1">°C</span>
+          </div>
+          <div id="temp-st" class="text-xs mt-1 text-slate-400">DHT22</div>
+        </div>
+
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-sky-500"
+        >
+          <div class="text-slate-500 text-xs font-semibold uppercase">
+            Ẩm không khí
+          </div>
+          <div class="mt-1 flex items-baseline">
+            <span id="hum" class="text-3xl font-extrabold text-slate-800"
+              >--</span
+            >
+            <span class="text-lg text-slate-400 ml-1">%</span>
+          </div>
+          <div id="hum-st" class="text-xs mt-1 text-slate-400">DHT22</div>
+        </div>
+
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-emerald-500"
+        >
+          <div class="text-slate-500 text-xs font-semibold uppercase">
+            Ẩm đất — Cà chua
+          </div>
+          <div class="mt-1 flex items-baseline">
+            <span id="soil" class="text-3xl font-extrabold text-slate-800"
+              >--</span
+            >
+            <span class="text-lg text-slate-400 ml-1">%</span>
+          </div>
+          <div id="soil-st" class="text-xs mt-1 text-slate-400">raw --</div>
+        </div>
+
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-lime-500"
+        >
+          <div class="text-slate-500 text-xs font-semibold uppercase">
+            Ẩm đất — Xà lách
+          </div>
+          <div class="mt-1 flex items-baseline">
+            <span id="soil2" class="text-3xl font-extrabold text-slate-800"
+              >--</span
+            >
+            <span class="text-lg text-slate-400 ml-1">%</span>
+          </div>
+          <div id="soil2-st" class="text-xs mt-1 text-slate-400">raw --</div>
+        </div>
+      </div>
+
+      <!-- Bơm + lưu lượng -->
+      <h2 class="text-xs font-bold text-slate-400 uppercase mb-2">Bơm nước</h2>
+      <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <div class="text-slate-500 text-xs font-semibold uppercase">
+              Trạng thái
+            </div>
+            <div id="pump" class="text-2xl font-extrabold text-slate-400 mt-1">
+              --
+            </div>
+            <div id="pump-stop" class="text-xs text-slate-400 mt-1"></div>
+          </div>
+          <div>
+            <div class="text-slate-500 text-xs font-semibold uppercase">
+              Lưu lượng
+            </div>
+            <div class="mt-1">
+              <span id="flow" class="text-2xl font-extrabold text-slate-800"
+                >--</span
+              >
+              <span class="text-sm text-slate-400">L/min</span>
+            </div>
+            <div id="liters" class="text-xs text-slate-400 mt-1">tổng -- L</div>
+          </div>
+          <div>
+            <div class="text-slate-500 text-xs font-semibold uppercase">
+              Phiên này
+            </div>
+            <div class="mt-1">
+              <span
+                id="pump-liters"
+                class="text-2xl font-extrabold text-slate-800"
+                >--</span
+              >
+              <span class="text-sm text-slate-400">L</span>
+            </div>
+            <div id="pump-left" class="text-xs text-slate-400 mt-1"></div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2 flex-wrap">
+          <label class="text-xs text-slate-500">Mục tiêu</label>
+          <input
+            id="target-l"
+            type="number"
+            min="0.1"
+            max="100"
+            step="0.5"
+            value="2"
+            class="w-20 px-2 py-1 border border-slate-300 rounded text-sm"
+          />
+          <span class="text-xs text-slate-500">lít</span>
+          <button
+            onclick="send('PUMP_ON')"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded"
+          >
+            Bật bơm
+          </button>
+          <button
+            onclick="send('PUMP_OFF')"
+            class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-semibold rounded"
+          >
+            Tắt bơm
+          </button>
+        </div>
+      </div>
+
+      <!-- Nâng hạ -->
+      <h2 class="text-xs font-bold text-slate-400 uppercase mb-2">
+        Giàn tưới (nâng / hạ)
+      </h2>
+      <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div class="flex gap-8">
+            <div>
+              <div class="text-slate-500 text-xs font-semibold uppercase">
+                Chuyển động
+              </div>
+              <div
+                id="lift"
+                class="text-2xl font-extrabold text-slate-400 mt-1"
+              >
+                --
+              </div>
+            </div>
+            <div>
+              <div class="text-slate-500 text-xs font-semibold uppercase">
+                Vị trí
+              </div>
+              <div
+                id="lift-pos"
+                class="text-2xl font-extrabold text-slate-800 mt-1"
+              >
+                --
+              </div>
+            </div>
+            <div>
+              <div class="text-slate-500 text-xs font-semibold uppercase">
+                Dòng
+              </div>
+              <div class="mt-1">
+                <span
+                  id="lift-amp"
+                  class="text-2xl font-extrabold text-slate-800"
+                  >--</span
+                >
+                <span class="text-sm text-slate-400">V</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              onclick="send('LIFT_UP')"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded"
+            >
+              Nâng
+            </button>
+            <button
+              onclick="send('LIFT_STOP')"
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded"
+            >
+              DỪNG
+            </button>
+            <button
+              onclick="send('LIFT_DOWN')"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded"
+            >
+              Hạ
+            </button>
+          </div>
+        </div>
+        <div id="lift-stop" class="text-xs text-slate-400 mt-2"></div>
+      </div>
+
+      <!-- Chẩn đoán + log -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm">
+          <div class="text-slate-500 text-xs font-semibold uppercase mb-2">
+            Chẩn đoán
+          </div>
+          <div class="text-sm space-y-1 text-slate-600">
+            <div>Lỗi DHT22: <span id="dht-err" class="font-bold">--</span></div>
+            <div>
+              Bơm chạy khô: <span id="dry-run" class="font-bold">--</span>
+            </div>
+            <div>
+              Lệnh cuối: <span id="ack" class="font-mono text-xs">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm lg:col-span-2">
+          <div class="text-slate-500 text-xs font-semibold uppercase mb-2">
+            Log thiết bị
+          </div>
+          <pre
+            id="log"
+            class="text-xs font-mono text-slate-600 h-32 overflow-y-auto whitespace-pre-wrap"
+          ></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      function show(id, value, ok, digits = 1) {
+        $(id).innerText = ok ? Number(value).toFixed(digits) : "--";
+        $(id).className = ok
+          ? "text-3xl font-extrabold text-slate-800"
+          : "text-3xl font-extrabold text-slate-300";
+      }
+
+      async function send(action) {
+        const body = { action };
+        if (action === "PUMP_ON") body.liters = parseFloat($("target-l").value);
+
+        try {
+          const res = await fetch("/api/control", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (data.status !== "success") alert("Lỗi: " + data.message);
+        } catch (e) {
+          alert("Không gửi được lệnh: " + e.message);
+        }
+      }
+
+      async function refresh() {
+        try {
+          const d = await (await fetch("/api/telemetry")).json();
+
+          $("conn").innerText = d.connected ? "ổn định" : "mất kết nối";
+          $("conn").className = d.connected
+            ? "font-bold text-emerald-600"
+            : "font-bold text-red-500";
+          $("uptime").innerText = d.uptime ? `· uptime ${d.uptime}s` : "";
+
+          show("temp", d.temp, d.dht_ok);
+          show("hum", d.hum, d.dht_ok);
+          show("soil", d.soil, d.soil_ok);
+          show("soil2", d.soil2, d.soil2_ok);
+
+          $("temp-st").innerText = d.dht_ok
+            ? "DHT22 · OK"
+            : "DHT22 · chưa có số liệu";
+          $("hum-st").innerText = $("temp-st").innerText;
+          $("soil-st").innerText =
+            `raw ${d.soil_raw}` + (d.soil_ok ? "" : " · lỗi dây?");
+          $("soil2-st").innerText =
+            `raw ${d.soil2_raw}` + (d.soil2_ok ? "" : " · lỗi dây?");
+
+          const on = d.pump === "ON";
+          $("pump").innerText = on ? "ĐANG CHẠY" : "TẮT";
+          $("pump").className = on
+            ? "text-2xl font-extrabold text-emerald-600 mt-1"
+            : "text-2xl font-extrabold text-slate-400 mt-1";
+          $("pump-stop").innerText =
+            !on && d.pump_stop !== "NONE" ? `dừng do: ${d.pump_stop}` : "";
+          $("pump-left").innerText = on ? `còn ${d.pump_left_s}s` : "";
+
+          $("flow").innerText = Number(d.flow).toFixed(2);
+          $("liters").innerText = `tổng ${Number(d.liters).toFixed(3)} L`;
+          $("pump-liters").innerText = Number(d.pump_liters).toFixed(3);
+
+          $("lift").innerText = d.lift;
+          $("lift").className =
+            d.lift === "STOP"
+              ? "text-2xl font-extrabold text-slate-400 mt-1"
+              : "text-2xl font-extrabold text-indigo-600 mt-1";
+          $("lift-pos").innerText = d.lift_pos;
+          $("lift-amp").innerText = Number(d.lift_amp_v).toFixed(3);
+          $("lift-stop").innerText =
+            d.lift_stop !== "NONE" ? `lần dừng gần nhất: ${d.lift_stop}` : "";
+
+          $("dht-err").innerText = d.dht_err;
+          $("dry-run").innerText = d.dry_run;
+          if (d.ack && d.ack.ack) {
+            $("ack").innerText =
+              `${d.ack.ack} → ${d.ack.ok ? "OK" : "TỪ CHỐI"} ${d.ack.reason || ""}`;
+          }
+        } catch (e) {
+          $("conn").innerText = "mất kết nối server";
+          $("conn").className = "font-bold text-red-500";
+        }
+      }
+
+      async function refreshLog() {
+        try {
+          const lines = await (await fetch("/api/log")).json();
+          const el = $("log");
+          const atBottom =
+            el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+          el.innerText = lines.map((l) => l.msg).join("\n");
+          if (atBottom) el.scrollTop = el.scrollHeight;
+        } catch (e) {}
+      }
+
+      setInterval(refresh, 1000);
+      setInterval(refreshLog, 2000);
+      refresh();
+      refreshLog();
+    </script>
+  </body>
+</html>
